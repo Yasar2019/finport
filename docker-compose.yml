@@ -44,6 +44,8 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://finport:finport_dev_password@db:5432/finport
       REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
     volumes:
       - ./backend:/app/backend
       - ./parsers:/app/parsers
