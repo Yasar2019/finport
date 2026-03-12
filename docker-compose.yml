@@ -116,8 +116,8 @@ services:
   # ─── React frontend (nginx in production) ─────────────────────────────────
   frontend:
     build:
-      context: ./frontend
-      dockerfile: ../docker/Dockerfile.frontend
+      context: .
+      dockerfile: docker/Dockerfile.frontend
     restart: unless-stopped
     ports:
       - "3000:80"
