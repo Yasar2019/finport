@@ -67,7 +67,7 @@ class IngestionService:
         # Enqueue background task
         from app.workers.tasks import run_ingestion_pipeline
 
-        run_ingestion_pipeline.delay(import_session_id=str(session.id))
+        run_ingestion_pipeline.delay(import_session_id=str(session.id))  # type: ignore[attr-defined]
 
         logger.info("ingestion.session_created", session_id=str(session.id))
         return session
@@ -105,5 +105,5 @@ class IngestionService:
         await self._db.flush()
         from app.workers.tasks import run_ingestion_pipeline
 
-        task = run_ingestion_pipeline.delay(import_session_id=str(session.id))
+        task = run_ingestion_pipeline.delay(import_session_id=str(session.id))  # type: ignore[attr-defined]
         return task.id

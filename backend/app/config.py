@@ -6,7 +6,7 @@ All secrets come from environment variables or the .env file — never hardcoded
 from functools import lru_cache
 from typing import Annotated
 
-from pydantic import AnyHttpUrl, Field, field_validator
+from pydantic import AnyHttpUrl, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # ── Database ─────────────────────────────────────────────────────────────
-    DATABASE_URL: str = "postgresql+asyncpg://finport:finport@localhost:5432/finport"
+    DATABASE_URL: str = "postgresql+asyncpg://finport:changeme@localhost:5432/finport"
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20
 

@@ -23,7 +23,7 @@ async def list_accounts(db: DbSession):
     return {"items": accounts}
 
 
-@router.get("/{account_id}")
+@router.get("/{account_id}", responses={404: {"description": "Account not found"}})
 async def get_account(account_id: uuid.UUID, db: DbSession):
     """Get account details including latest valuation."""
     service = AccountService(db)

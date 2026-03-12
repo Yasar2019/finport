@@ -18,7 +18,7 @@ Alembic manages all migrations; never alter tables manually.
 
 ## Entity Relationship Overview
 
-```
+```text
 institutions ──< accounts ──< statements ──< transactions
                          │                └──< holdings
                          │                └──< dividends
@@ -597,7 +597,7 @@ CREATE INDEX idx_fx_rates_lookup ON fx_rates(from_currency, to_currency, rate_da
 ## Index Strategy Summary
 
 | Access Pattern | Index |
-|---|---|
+| --- | --- |
 | All transactions for an account, recent first | `(account_id, transaction_date DESC)` |
 | All open reconciliation issues | `(status) WHERE status='open'` |
 | Duplicate detection | `(account_id, transaction_date, amount, transaction_type)` |

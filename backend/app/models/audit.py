@@ -5,13 +5,17 @@ AuditLog is append-only — no UPDATE or DELETE operations.
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
-from sqlalchemy import DateTime, ForeignKey, String, Text, Boolean, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import INET, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.session import Base
+
+if TYPE_CHECKING:
+    from app.models.import_session import ImportSession
 
 
 class ReconciliationRecord(Base):

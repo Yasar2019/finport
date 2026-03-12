@@ -5,6 +5,7 @@ Sensitive account_number is stored encrypted (application-layer AES via Encrypte
 
 import uuid
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
@@ -12,6 +13,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.session import Base
 from app.models.types import EncryptedString
+
+if TYPE_CHECKING:
+    from app.models.import_session import ImportSession
+    from app.models.institution import Institution
+    from app.models.portfolio import Holding, TaxLot, Valuation
+    from app.models.statement import Statement
+    from app.models.transaction import Transaction
 
 
 class Account(Base):

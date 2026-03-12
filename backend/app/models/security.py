@@ -5,12 +5,17 @@ Canonical reference for all financial instruments.
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.session import Base
+
+if TYPE_CHECKING:
+    from app.models.institution import Institution
+    from app.models.portfolio import CorporateAction, Holding, TaxLot
 
 
 class Security(Base):

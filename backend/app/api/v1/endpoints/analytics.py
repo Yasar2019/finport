@@ -19,8 +19,8 @@ DbSession = Annotated[AsyncSession, Depends(get_db_session)]
 @router.get("/net-worth")
 async def net_worth_history(
     db: DbSession,
-    date_from: date | None = Query(None),
-    date_to: date | None = Query(None),
+    date_from: Annotated[date | None, Query()] = None,
+    date_to: Annotated[date | None, Query()] = None,
 ):
     """
     Consolidated net worth over time (time-series from valuations).
@@ -50,8 +50,8 @@ async def portfolio_allocation(db: DbSession):
 @router.get("/performance")
 async def performance(
     db: DbSession,
-    date_from: date | None = Query(None),
-    date_to: date | None = Query(None),
+    date_from: Annotated[date | None, Query()] = None,
+    date_to: Annotated[date | None, Query()] = None,
 ):
     """
     Realised and unrealised gains/losses.
@@ -69,8 +69,8 @@ async def performance(
 @router.get("/dividends")
 async def dividend_income(
     db: DbSession,
-    year: int | None = Query(None),
-    group_by: str = Query("month", pattern="^(month|quarter|year|security)$"),
+    year: Annotated[int | None, Query()] = None,
+    group_by: Annotated[str, Query(pattern="^(month|quarter|year|security)$")] = "month",
 ):
     """Dividend income history grouped by the specified period or security."""
     service = AnalyticsService(db)
@@ -84,8 +84,8 @@ async def dividend_income(
 @router.get("/fees")
 async def fee_analysis(
     db: DbSession,
-    date_from: date | None = Query(None),
-    date_to: date | None = Query(None),
+    date_from: Annotated[date | None, Query()] = None,
+    date_to: Annotated[date | None, Query()] = None,
 ):
     """Fee analysis: total fees by type and account."""
     service = AnalyticsService(db)

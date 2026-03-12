@@ -156,14 +156,13 @@ def run_ingestion_pipeline(self, import_session_id: str) -> dict:
                 )
 
                 # Reconcile only after successful normalisation
-                run_reconciliation.delay(import_session_id=import_session_id)
+                run_reconciliation.delay(import_session_id=import_session_id)  # type: ignore[attr-defined]
 
             # Update session
-            session.status = (
-                "needs_review"
-                if not session.account_id
-                else ("completed" if result.overall_confidence >= 0.65 else "needs_review")
-            )
+            if not session.account_id or result.overall_confidence < 0.65:
+                session.status = "needs_review"
+            else:
+                session.status = "completed"
             if detection.institution_key:
                 pass  # resolve institution_id from short_code if needed
             session.statement_period_start = result.metadata.period_start
@@ -203,6 +202,7 @@ def run_reconciliation(self, import_session_id: str) -> dict:
         from reconciliation.engine import ReconciliationEngine
 
         engine = ReconciliationEngine(db)
-        counts = engine.run(import_session_id=uuid.UUID(import_session_id))
+        issues = engine.run(import_session_id=uuid.UUID(import_session_id))
+        counts = {"issues_created": len(issues)}
         log.info("reconciliation.completed", issue_counts=counts)
         return counts

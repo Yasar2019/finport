@@ -22,9 +22,9 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan: runs startup tasks, yields, runs shutdown tasks."""
-    await startup_event()
+    startup_event()
     yield
-    await shutdown_event()
+    shutdown_event()
 
 
 def create_application() -> FastAPI:

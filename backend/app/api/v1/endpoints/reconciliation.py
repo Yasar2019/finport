@@ -18,10 +18,10 @@ DbSession = Annotated[AsyncSession, Depends(get_db_session)]
 @router.get("/issues")
 async def list_issues(
     db: DbSession,
-    severity: str | None = Query(None, pattern="^(info|warning|error)$"),
-    status: str | None = Query("open", pattern="^(open|resolved|dismissed|all)$"),
-    limit: int = Query(100, le=500),
-    offset: int = Query(0, ge=0),
+    severity: Annotated[str | None, Query(pattern="^(info|warning|error)$")] = None,
+    status: Annotated[str | None, Query(pattern="^(open|resolved|dismissed|all)$")] = "open",
+    limit: Annotated[int, Query(le=500)] = 100,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ):
     """
     List open reconciliation issues.

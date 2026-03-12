@@ -160,7 +160,6 @@ class GenericPDFParser(BaseParser):
         for tbl_idx, table in enumerate(tables):
             if len(table) < 2:
                 continue
-            header = [str(c).strip().lower() for c in table[0]]
             for row_idx, row in enumerate(table[1:], start=1):
                 # Simple heuristic: look for a date in the first few cells
                 tx_date: date | None = None

@@ -5,6 +5,7 @@ Holding, Valuation, TaxLot, and CorporateAction ORM models.
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     Boolean,
@@ -21,6 +22,10 @@ from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.session import Base
+
+if TYPE_CHECKING:
+    from app.models.account import Account
+    from app.models.security import Security
 
 
 class Holding(Base):

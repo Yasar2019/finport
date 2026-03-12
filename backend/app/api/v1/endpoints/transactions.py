@@ -19,13 +19,13 @@ DbSession = Annotated[AsyncSession, Depends(get_db_session)]
 @router.get("")
 async def list_transactions(
     db: DbSession,
-    account_id: uuid.UUID | None = Query(None),
-    transaction_type: str | None = Query(None),
-    date_from: date | None = Query(None),
-    date_to: date | None = Query(None),
-    search: str | None = Query(None, max_length=200),
-    limit: int = Query(100, le=500),
-    offset: int = Query(0, ge=0),
+    account_id: Annotated[uuid.UUID | None, Query()] = None,
+    transaction_type: Annotated[str | None, Query()] = None,
+    date_from: Annotated[date | None, Query()] = None,
+    date_to: Annotated[date | None, Query()] = None,
+    search: Annotated[str | None, Query(max_length=200)] = None,
+    limit: Annotated[int, Query(le=500)] = 100,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ):
     """
     List transactions with filtering.

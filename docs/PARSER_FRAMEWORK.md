@@ -30,7 +30,7 @@ This separation makes parsers independently testable and independently deployabl
 
 ## Component Map
 
-```
+```text
                     ┌────────────────────────────────┐
                     │        Parser Registry         │
                     │  {institution_key + format}    │
@@ -320,7 +320,7 @@ class InstitutionDetector:
 
 ## OCR Fallback Strategy
 
-```
+```text
 PDF file
     │
     ├── pdfplumber structured extraction
@@ -343,7 +343,7 @@ and returns what it could extract with a low confidence score.
 ## Confidence Scoring Guide
 
 | Score Range | Meaning | Import Status |
-|---|---|---|
+| --- | --- | --- |
 | 0.85 – 1.00 | High confidence; all expected fields found | `COMPLETED` |
 | 0.65 – 0.84 | Moderate confidence; some fields missing | `COMPLETED` with info notices |
 | 0.45 – 0.64 | Low confidence; significant gaps | `NEEDS_REVIEW` |

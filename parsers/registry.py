@@ -22,12 +22,14 @@ If no institution-specific parser matches, the generic fallback is returned.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
     from parsers.base.parser_interface import BaseParser
 
 logger = logging.getLogger(__name__)
+
+_ParserT = TypeVar("_ParserT", bound="BaseParser")
 
 # Registry structure:
 #   { "institution_key": { "pdf": ParserClass, "csv": ParserClass, ... } }
@@ -45,7 +47,7 @@ class ParserRegistry:
     ):
         """Class decorator that registers a parser for the given institution and formats."""
 
-        def decorator(cls: type["BaseParser"]) -> type["BaseParser"]:
+        def decorator(cls: type[_ParserT]) -> type[_ParserT]:
             _REGISTRY.setdefault(institution_key, {})
             for fmt in formats:
                 if fmt in _REGISTRY[institution_key]:
@@ -66,7 +68,7 @@ class ParserRegistry:
     def register_generic(formats: list[str]):
         """Class decorator for generic (non-institution-specific) parsers."""
 
-        def decorator(cls: type["BaseParser"]) -> type["BaseParser"]:
+        def decorator(cls: type[_ParserT]) -> type[_ParserT]:
             for fmt in formats:
                 _GENERIC_REGISTRY[fmt] = cls
             return cls

@@ -47,6 +47,15 @@ _FIDELITY_TX_TYPES: dict[str, str] = {
     "stock split": "corporate_action",
 }
 
+# Fidelity CSV header columns for detection
+_FIDELITY_CSV_COLS = {
+    "run date",
+    "action",
+    "symbol",
+    "description",
+    "amount",
+}
+
 
 def _classify_type(description: str) -> str:
     lower = description.lower()
@@ -91,17 +100,10 @@ class FidelityParser(GenericPDFParser):
                 header_line = content_sample.split(b"\n")[0].decode(
                     "utf-8", errors="ignore"
                 )
-                fidelity_cols = {
-                    "run date",
-                    "action",
-                    "symbol",
-                    "description",
-                    "amount",
-                }
                 csv_cols = {
                     c.strip().lower().strip('"') for c in header_line.split(",")
                 }
-                overlap = fidelity_cols & csv_cols
+                overlap = _FIDELITY_CSV_COLS & csv_cols
                 if len(overlap) >= 4:
                     return 0.95
             except Exception:

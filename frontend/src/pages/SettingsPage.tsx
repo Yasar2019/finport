@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAccounts, updateAccount } from '@/lib/api';
 
@@ -141,13 +141,13 @@ export function SettingsPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <input
                       value={editName}
-                      onChange={e => setEditName(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
                       className="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                       placeholder="Account name"
                     />
                     <select
                       value={editType}
-                      onChange={e => setEditType(e.target.value)}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEditType(e.target.value)}
                       className="rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                     >
                       {ACCOUNT_TYPES.map(t => (

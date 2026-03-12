@@ -1,0 +1,11 @@
+{
+  "include": ["backend", "parsers", "reconciliation", "analytics"],
+  "pythonVersion": "3.12",
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false,
+  "reportAttributeAccessIssue": false,
+  "reportGeneralTypeIssues": false
+}

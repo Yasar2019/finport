@@ -1,5 +1,7 @@
 # FinPort — Development Roadmap
 
+<!-- markdownlint-disable MD024 -->
+
 ---
 
 ## Phasing Philosophy
@@ -213,7 +215,7 @@ The system is deployable to a VPS with one command.
 
 ## Dependency Graph
 
-```
+```text
 Phase 1 (foundation)
     └── Phase 2 (parsers + normalisation)
             └── Phase 3 (reconciliation)       ← depends on normalised data
@@ -228,7 +230,7 @@ Phases 3 and 4 can proceed in parallel after Phase 2.
 ## Testing Strategy by Phase
 
 | Phase | Test Focus |
-|---|---|
+| --- | --- |
 | 1 | API integration tests (upload, status polling), worker task execution |
 | 2 | Parser unit tests with real fixture statements, normalisation unit tests, SecurityMaster resolution |
 | 3 | Reconciliation rule unit tests, de-duplication edge cases, transfer matching |
@@ -241,7 +243,7 @@ Phases 3 and 4 can proceed in parallel after Phase 2.
 
 `tests/fixtures/statements/` should accumulate real (anonymised) statement samples:
 
-```
+```text
 tests/fixtures/statements/
 ├── fidelity/
 │   ├── brokerage_activity_2024.csv

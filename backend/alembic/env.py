@@ -12,9 +12,13 @@ from app.database.session import Base  # noqa: F401
 import app.models  # noqa: F401 — triggers all model registrations
 
 config = context.config
-fileConfig(config.config_file_name)
+if config.config_file_name:
+    fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+
+# Config keys
+_SQLALCHEMY_URL = "sqlalchemy.url"
 
 
 def _sync_url(url: str) -> str:
@@ -23,7 +27,11 @@ def _sync_url(url: str) -> str:
 
 
 def run_migrations_offline() -> None:
-    url = config.get_main_option("sqlalchemy.url")
+    import os
+    db_url = os.getenv("DATABASE_URL") or config.get_main_option(_SQLALCHEMY_URL)
+    if not db_url:
+        raise ValueError("DATABASE_URL not set and sqlalchemy.url not configured in alembic.ini")
+    url = _sync_url(db_url)
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -38,7 +46,9 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     import os
 
-    db_url = os.getenv("DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+    db_url = os.getenv("DATABASE_URL") or config.get_main_option(_SQLALCHEMY_URL)
+    if not db_url:
+        raise ValueError("DATABASE_URL not set and sqlalchemy.url not configured in alembic.ini")
     sync_url = _sync_url(db_url)
 
     connectable = engine_from_config(

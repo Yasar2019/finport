@@ -1,5 +1,7 @@
 # FinPort — Financial Portfolio Intelligence Platform
 
+<!-- markdownlint-disable MD024 -->
+
 ## Complete Technical Architecture & Implementation Plan
 
 ---
@@ -12,20 +14,20 @@ Before finalising the architecture, the design was stress-tested by five special
 
 ### Reviewer 1 — Senior Backend Architect
 
-**Weaknesses identified**
+#### Weaknesses identified
 
 - A naive monolithic design would couple ingestion, parsing, normalisation, and analytics tightly, making SaaS decomposition difficult later.
 - Synchronous PDF parsing inside the HTTP request cycle will time-out on large statements (some broker PDFs exceed 200 pages).
 - Without explicit API versioning from day one, future breaking changes force either flag-based branching or a full migration.
 
-**Missing components**
+#### Missing components
 
 - An asynchronous job queue with worker isolation (Celery + Redis).
 - A job-status polling mechanism (SSE or a `/imports/{id}/status` endpoint) so the UI can track long-running parses.
 - Background task monitoring (Flower dashboard for Celery).
 - A CQRS split: write path (ingestion commands) separated from the read path (portfolio queries).
 
-**Improvements adopted**
+#### Improvements adopted
 
 - All parsing, normalisation, and reconciliation runs in Celery workers; the API only enqueues and returns a job ID.
 - Module boundaries are enforced through abstract interfaces, not just directories.
@@ -35,20 +37,20 @@ Before finalising the architecture, the design was stress-tested by five special
 
 ### Reviewer 2 — Data Engineering Specialist
 
-**Weaknesses identified**
+#### Weaknesses identified
 
 - A single parser per institution will fail silently when the institution changes its statement layout.
 - Transfer detection across institutions (the same wire appears as a debit at bank A and a credit at bank B) requires a dedicated reconciler — parsers must not guess.
 - No schema-level validation guarantees parser output is safe to persist.
 
-**Missing components**
+#### Missing components
 
 - **Parser versioning**: each parser records its version; re-processing historical imports when the parser is updated must be supported.
 - **Data lineage**: every normalised record must carry `import_session_id`, `parser_run_id`, `raw_source_ref` (JSON pointer to the raw row), and `parser_confidence`.
 - **Idempotent ingestion**: SHA-256 hash of the uploaded file prevents re-ingesting the same statement.
 - A validation layer (Pydantic models) between raw parser output and the persistence layer.
 
-**Improvements adopted**
+#### Improvements adopted
 
 - The parser outputs `CandidateRecord` Pydantic models, not raw dicts.
 - Every ORM model carries provenance columns (`import_session_id`, `parser_run_id`, `parser_confidence`, `raw_source_ref`).
@@ -58,13 +60,13 @@ Before finalising the architecture, the design was stress-tested by five special
 
 ### Reviewer 3 — Security Engineer
 
-**Weaknesses identified**
+#### Weaknesses identified
 
 - PDF/Excel parsers are attack surfaces: malicious files can trigger exploits in parsing libraries. Workers must be sandboxed.
 - Uploaded financial documents contain PII and must be encrypted at rest, not just in transit.
 - Common mistake: logging raw account numbers or transaction amounts at DEBUG level.
 
-**Missing components**
+#### Missing components
 
 - File-type validation (MIME + magic bytes, not just extension) and size limits before accepting uploads.
 - Fernet symmetric encryption for files at rest; application-managed key stored in environment.
@@ -72,7 +74,7 @@ Before finalising the architecture, the design was stress-tested by five special
 - Argon2-id for password hashing (future multi-user).
 - Secure temporary file cleanup after parsing completes.
 
-**Improvements adopted**
+#### Improvements adopted
 
 - Upload endpoint validates MIME type, enforces a 50 MB size cap, and rejects files that don't match expected magic bytes.
 - Uploaded files are encrypted before writing to disk using Fernet; the encryption key lives in the environment only.
@@ -84,14 +86,14 @@ Before finalising the architecture, the design was stress-tested by five special
 
 ### Reviewer 4 — FinTech Domain Expert
 
-**Weaknesses identified**
+#### Weaknesses identified
 
 - Cost-basis calculation requires knowing the acquisition lot (FIFO, LIFO, specific lot, or average cost) — this must be a first-class concept.
 - Corporate actions (splits, mergers, spin-offs) retroactively change unit quantities and cost basis. Without a `corporate_actions` table, historical performance is inaccurate.
 - Dividend reinvestment (DRIP) creates fractional-share purchases — easy to mis-classify as pure income.
 - Ticker symbols are not a reliable security primary key: the same Bloomberg ticker can change meaning; CUSIP/ISIN is authoritative.
 
-**Missing components**
+#### Missing components
 
 - `tax_lots` table for acquisition-level cost basis.
 - `corporate_actions` table with split ratios.
@@ -100,7 +102,7 @@ Before finalising the architecture, the design was stress-tested by five special
 - Return-of-capital handling (tax treatment differs from ordinary dividends).
 - Transaction classification taxonomy: `buy`, `sell`, `dividend_cash`, `dividend_reinvest`, `interest`, `fee_commission`, `fee_management`, `fee_other`, `transfer_in`, `transfer_out`, `deposit`, `withdrawal`, `return_of_capital`, `corporate_action`, `split_adjustment`, `option_exercise`, `margin_interest`, `journal`.
 
-**Improvements adopted**
+#### Improvements adopted
 
 - SecurityMaster is a dedicated table; all holdings/transactions reference it by ID.
 - `security_aliases` resolve institution-specific symbols.
@@ -112,13 +114,13 @@ Before finalising the architecture, the design was stress-tested by five special
 
 ### Reviewer 5 — DevOps / Infrastructure Engineer
 
-**Weaknesses identified**
+#### Weaknesses identified
 
 - Heavy PDF libraries (camelot, pdfminer) can consume 500 MB+ RAM per worker; workers must be isolated and resource-limited.
 - Using SQLite in a Docker volume is fragile; the architecture must make PostgreSQL the standard target from Phase 1.
 - No storage abstraction — `open("path")` calls scattered through code make S3 migration expensive later.
 
-**Missing components**
+#### Missing components
 
 - Docker Compose with services: `api`, `worker`, `redis`, `db`, `frontend`, `flower`.
 - A `StorageBackend` abstraction (local filesystem today, S3-compatible tomorrow).
@@ -127,7 +129,7 @@ Before finalising the architecture, the design was stress-tested by five special
 - `Makefile` with standard dev commands.
 - Graceful worker shutdown (SIGTERM handling in Celery).
 
-**Improvements adopted**
+#### Improvements adopted
 
 - `StorageBackend` interface with `LocalStorageBackend` and a stub `S3StorageBackend`.
 - Full Docker Compose provided.
@@ -140,7 +142,7 @@ Before finalising the architecture, the design was stress-tested by five special
 
 ### 2.1 High-Level Component Map
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        FINPORT PLATFORM                             │
 │                                                                     │
@@ -191,7 +193,7 @@ Before finalising the architecture, the design was stress-tested by five special
 ### 2.2 Service Boundaries
 
 | Layer | Responsibility | Process |
-|---|---|---|
+| --- | --- | --- |
 | **API Layer** | HTTP handling, auth, file validation, job dispatch | FastAPI (uvicorn) |
 | **Task Layer** | CPU-intensive parsing, normalisation, reconciliation | Celery workers |
 | **Parser Framework** | Institution-specific and generic document parsing | Library (imported by workers) |
@@ -207,7 +209,7 @@ Before finalising the architecture, the design was stress-tested by five special
 
 ### 2.3 Core Data Flow — Statement Ingestion
 
-```
+```text
 User uploads file (PDF / CSV / Excel)
           │
           ▼
@@ -265,7 +267,7 @@ User uploads file (PDF / CSV / Excel)
 
 ### 2.4 Security Architecture
 
-```
+```text
 TRANSPORT:  TLS everywhere (HTTPS in production, localhost in dev)
 
 AUTHENTICATION:
@@ -300,7 +302,7 @@ UPLOADS:
 ### 2.5 Technology Stack Justification
 
 | Choice | Rationale |
-|---|---|
+| --- | --- |
 | **Python 3.12** | Rich ecosystem for document parsing, finance, and data engineering. Pydantic v2 and SQLAlchemy 2.0 make it excellent for typed domain models. |
 | **FastAPI** | Native async, auto-generated OpenAPI docs, Pydantic-native request/response models, excellent performance. Straightforward to migrate to microservices later. |
 | **SQLAlchemy 2.0 async** | Type-safe ORM, async-native, Alembic support for migrations, compatible with both SQLite (dev) and PostgreSQL (prod). |
@@ -323,7 +325,7 @@ UPLOADS:
 The local-first architecture is deliberately designed to permit SaaS evolution without rewrites.
 
 | Concern | Local (Phase 1) | SaaS (Phase 5) |
-|---|---|---|
+| --- | --- | --- |
 | Auth | Single-user bearer token | Auth0 / Cognito OIDC |
 | File storage | Local encrypted filesystem | AWS S3 / Cloudflare R2 (same `StorageBackend` interface) |
 | Database | PostgreSQL (Docker) | AWS RDS / Supabase — add `tenant_id` column via migration |

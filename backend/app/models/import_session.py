@@ -5,6 +5,7 @@ Represents one uploaded file and the full lifecycle of its processing.
 
 import uuid
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     BigInteger,
@@ -20,6 +21,12 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.session import Base
+
+if TYPE_CHECKING:
+    from app.models.account import Account
+    from app.models.audit import ReconciliationRecord
+    from app.models.institution import Institution
+    from app.models.parser_run import ParserRun
 
 
 class ImportSession(Base):

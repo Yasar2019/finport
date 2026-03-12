@@ -28,8 +28,8 @@ DbSession = Annotated[AsyncSession, Depends(get_db_session)]
 
 @router.post("/upload", status_code=status.HTTP_202_ACCEPTED)
 async def upload_statement(
-    file: UploadFile = File(...),
-    db: DbSession = ...,
+    file: Annotated[UploadFile, File()],
+    db: DbSession,
 ):
     """
     Upload a financial statement for processing.
@@ -93,7 +93,7 @@ async def upload_statement(
     }
 
 
-@router.get("/{session_id}/status")
+@router.get("/{session_id}/status", responses={404: {"description": "Import session not found"}})
 async def get_import_status(session_id: uuid.UUID, db: DbSession):
     """Poll the processing status of an import session."""
     service = IngestionService(db=db, storage=get_storage_backend())

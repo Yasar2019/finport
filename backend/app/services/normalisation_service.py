@@ -123,7 +123,7 @@ class NormalisationService:
     def _resolve_account(
         self,
         import_session: ImportSession,
-        parser_result: ParserResult,
+        _parser_result: ParserResult,
         db: Session,
     ) -> Account | None:
         """Return the associated Account if already linked, else None."""
@@ -138,7 +138,7 @@ class NormalisationService:
     def _create_statement(
         self,
         import_session: ImportSession,
-        parser_run: ParserRun,
+        _parser_run: ParserRun,
         parser_result: ParserResult,
         account: Account | None,
         db: Session,

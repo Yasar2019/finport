@@ -86,6 +86,10 @@ class LocalEncryptedStorageBackend(StorageBackend):
         return f"{user_id}/{session_id}/original{ext}"
 
 
+# S3 backend error message constant to avoid repetition
+_S3_NOT_IMPLEMENTED = "S3 storage backend not yet implemented."
+
+
 class S3StorageBackend(StorageBackend):
     """
     S3-compatible storage backend (Phase 5).
@@ -93,13 +97,13 @@ class S3StorageBackend(StorageBackend):
     """
 
     async def write(self, relative_path: str, content: bytes) -> str:
-        raise NotImplementedError("S3 storage backend not yet implemented.")
+        raise NotImplementedError(_S3_NOT_IMPLEMENTED)
 
     async def read(self, relative_path: str) -> bytes:
-        raise NotImplementedError("S3 storage backend not yet implemented.")
+        raise NotImplementedError(_S3_NOT_IMPLEMENTED)
 
     async def delete(self, relative_path: str) -> None:
-        raise NotImplementedError("S3 storage backend not yet implemented.")
+        raise NotImplementedError(_S3_NOT_IMPLEMENTED)
 
     def build_path(
         self, user_id: uuid.UUID, session_id: uuid.UUID, filename: str

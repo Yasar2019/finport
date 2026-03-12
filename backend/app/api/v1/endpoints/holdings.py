@@ -19,10 +19,10 @@ DbSession = Annotated[AsyncSession, Depends(get_db_session)]
 @router.get("")
 async def list_holdings(
     db: DbSession,
-    account_id: uuid.UUID | None = Query(None),
-    as_of_date: date | None = Query(
-        None, description="Defaults to latest available date"
-    ),
+    account_id: Annotated[uuid.UUID | None, Query()] = None,
+    as_of_date: Annotated[
+        date | None, Query(description="Defaults to latest available date")
+    ] = None,
 ):
     """
     Return current holdings, optionally filtered by account and date.

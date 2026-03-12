@@ -16,8 +16,8 @@ DbSession = Annotated[AsyncSession, Depends(get_db_session)]
 
 @router.get("/search")
 async def search_securities(
-    q: str = Query(..., min_length=1, max_length=100),
-    db: DbSession = ...,
+    q: Annotated[str, Query(min_length=1, max_length=100)],
+    db: DbSession,
 ):
     """Search the SecurityMaster by symbol, ISIN, CUSIP, or name."""
     from app.services.security_service import SecurityService

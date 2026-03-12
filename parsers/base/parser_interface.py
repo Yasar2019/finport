@@ -109,7 +109,7 @@ class BaseParser(ABC):
         dividends: list[CandidateDividend] = []
         fees: list[CandidateFee] = []
 
-        steps: dict[str, object] = {
+        steps: dict[str, tuple] = {
             "metadata": (self.extract_metadata, None),
             "transactions": (self.extract_transactions, []),
             "holdings": (self.extract_holdings, []),
