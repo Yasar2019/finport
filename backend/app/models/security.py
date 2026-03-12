@@ -87,5 +87,3 @@ class SecurityAlias(Base):
     institution: Mapped["Institution | None"] = relationship(
         "Institution", back_populates="security_aliases"
     )
-
-

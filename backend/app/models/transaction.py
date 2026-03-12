@@ -125,7 +125,9 @@ class Transaction(Base):
 
     # Relationships
     account: Mapped["Account"] = relationship("Account", back_populates="transactions")
-    statement: Mapped["Statement | None"] = relationship("Statement", back_populates="transactions")
+    statement: Mapped["Statement | None"] = relationship(
+        "Statement", back_populates="transactions"
+    )
     security: Mapped["Security | None"] = relationship("Security")
 
     def __repr__(self) -> str:

@@ -59,9 +59,7 @@ class HoldingsService:
         )
         holdings = result.scalars().all()
 
-        total_market_value = sum(
-            (h.market_value or Decimal(0)) for h in holdings
-        )
+        total_market_value = sum((h.market_value or Decimal(0)) for h in holdings)
 
         return {
             "total_market_value": float(total_market_value),
@@ -78,9 +76,17 @@ class HoldingsService:
             "as_of_date": h.as_of_date.isoformat(),
             "quantity": float(h.quantity),
             "cost_basis": float(h.cost_basis) if h.cost_basis is not None else None,
-            "market_value": float(h.market_value) if h.market_value is not None else None,
+            "market_value": (
+                float(h.market_value) if h.market_value is not None else None
+            ),
             "price": float(h.price) if h.price is not None else None,
             "currency": h.currency,
-            "unrealized_gain": float(h.unrealized_gain) if h.unrealized_gain is not None else None,
-            "unrealized_gain_pct": float(h.unrealized_gain_pct) if h.unrealized_gain_pct is not None else None,
+            "unrealized_gain": (
+                float(h.unrealized_gain) if h.unrealized_gain is not None else None
+            ),
+            "unrealized_gain_pct": (
+                float(h.unrealized_gain_pct)
+                if h.unrealized_gain_pct is not None
+                else None
+            ),
         }

@@ -118,7 +118,7 @@ async def get_import_status(session_id: uuid.UUID, db: DbSession):
     }
 
 
-@router.get("/")
+@router.get("")
 async def list_import_sessions(db: DbSession, limit: int = 50, offset: int = 0):
     """List all import sessions for the current user."""
     service = IngestionService(db=db, storage=get_storage_backend())

@@ -96,7 +96,9 @@ class TransactionService:
             "description": t.description_normalized or t.description_raw,
             "security_id": str(t.security_id) if t.security_id else None,
             "quantity": float(t.quantity) if t.quantity is not None else None,
-            "price_per_unit": float(t.price_per_unit) if t.price_per_unit is not None else None,
+            "price_per_unit": (
+                float(t.price_per_unit) if t.price_per_unit is not None else None
+            ),
             "is_reconciled": t.is_reconciled,
             "is_manually_reviewed": t.is_manually_reviewed,
         }

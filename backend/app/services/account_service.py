@@ -66,6 +66,10 @@ class AccountService:
             "institution_id": str(account.institution_id),
             "currency": account.currency,
             "is_active": account.is_active,
-            "opened_date": account.opened_date.isoformat() if account.opened_date else None,
-            "created_at": account.created_at.isoformat() if account.created_at else None,
+            "opened_date": (
+                account.opened_date.isoformat() if account.opened_date else None
+            ),
+            "created_at": (
+                account.created_at.isoformat() if account.created_at else None
+            ),
         }

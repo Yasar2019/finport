@@ -36,6 +36,7 @@ def create_application() -> FastAPI:
         docs_url=f"{settings.API_V1_STR}/docs",
         redoc_url=f"{settings.API_V1_STR}/redoc",
         lifespan=lifespan,
+        redirect_slashes=False,
     )
 
     # Security: restrict allowed hosts in production

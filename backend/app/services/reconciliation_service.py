@@ -24,9 +24,7 @@ class ReconciliationService:
         limit: int = 100,
         offset: int = 0,
     ) -> dict:
-        q = select(ReconciliationRecord).where(
-            ReconciliationRecord.user_id == user_id
-        )
+        q = select(ReconciliationRecord).where(ReconciliationRecord.user_id == user_id)
         if severity is not None:
             q = q.where(ReconciliationRecord.severity == severity)
         if status is not None:
@@ -101,9 +99,7 @@ class ReconciliationService:
         await self._db.commit()
         return await self._get_one(issue_id=issue_id, user_id=user_id)
 
-    async def _get_one(
-        self, issue_id: uuid.UUID, user_id: uuid.UUID
-    ) -> dict | None:
+    async def _get_one(self, issue_id: uuid.UUID, user_id: uuid.UUID) -> dict | None:
         result = await self._db.execute(
             select(ReconciliationRecord).where(
                 ReconciliationRecord.id == issue_id,

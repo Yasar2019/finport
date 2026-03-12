@@ -95,9 +95,7 @@ class AnalyticsService:
         )
         holdings = result.scalars().all()
 
-        total_unrealized = sum(
-            (h.unrealized_gain or Decimal(0)) for h in holdings
-        )
+        total_unrealized = sum((h.unrealized_gain or Decimal(0)) for h in holdings)
 
         return {
             "unrealized_gain_loss": float(total_unrealized),
@@ -108,8 +106,12 @@ class AnalyticsService:
                     "quantity": float(h.quantity),
                     "cost_basis": float(h.cost_basis) if h.cost_basis else None,
                     "market_value": float(h.market_value) if h.market_value else None,
-                    "unrealized_gain": float(h.unrealized_gain) if h.unrealized_gain else None,
-                    "unrealized_gain_pct": float(h.unrealized_gain_pct) if h.unrealized_gain_pct else None,
+                    "unrealized_gain": (
+                        float(h.unrealized_gain) if h.unrealized_gain else None
+                    ),
+                    "unrealized_gain_pct": (
+                        float(h.unrealized_gain_pct) if h.unrealized_gain_pct else None
+                    ),
                 }
                 for h in holdings
             ],
@@ -123,15 +125,11 @@ class AnalyticsService:
     ) -> list[dict]:
         q = select(Transaction).where(
             Transaction.user_id == user_id,
-            Transaction.transaction_type.in_(
-                ["dividend_cash", "dividend_reinvest"]
-            ),
+            Transaction.transaction_type.in_(["dividend_cash", "dividend_reinvest"]),
             Transaction.deleted_at.is_(None),
         )
         if year is not None:
-            q = q.where(
-                func.extract("year", Transaction.transaction_date) == year
-            )
+            q = q.where(func.extract("year", Transaction.transaction_date) == year)
 
         result = await self._db.execute(q)
         transactions = result.scalars().all()
@@ -150,9 +148,7 @@ class AnalyticsService:
                 key = t.transaction_date.strftime("%Y-%m")
             groups[key] = groups.get(key, Decimal(0)) + t.amount
 
-        return [
-            {"period": k, "amount": float(v)} for k, v in sorted(groups.items())
-        ]
+        return [{"period": k, "amount": float(v)} for k, v in sorted(groups.items())]
 
     async def get_fee_analysis(
         self,
@@ -180,14 +176,12 @@ class AnalyticsService:
 
         by_type: dict[str, Decimal] = {}
         for t in transactions:
-            by_type[t.transaction_type] = (
-                by_type.get(t.transaction_type, Decimal(0)) + abs(t.amount)
-            )
+            by_type[t.transaction_type] = by_type.get(
+                t.transaction_type, Decimal(0)
+            ) + abs(t.amount)
 
         total = sum(by_type.values(), Decimal(0))
         return {
             "total_fees": float(total),
-            "by_type": [
-                {"type": k, "amount": float(v)} for k, v in by_type.items()
-            ],
+            "by_type": [{"type": k, "amount": float(v)} for k, v in by_type.items()],
         }

@@ -16,7 +16,7 @@ settings = get_settings()
 DbSession = Annotated[AsyncSession, Depends(get_db_session)]
 
 
-@router.get("/")
+@router.get("")
 async def list_transactions(
     db: DbSession,
     account_id: uuid.UUID | None = Query(None),

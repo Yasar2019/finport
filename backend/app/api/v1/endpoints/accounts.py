@@ -15,7 +15,7 @@ settings = get_settings()
 DbSession = Annotated[AsyncSession, Depends(get_db_session)]
 
 
-@router.get("/")
+@router.get("")
 async def list_accounts(db: DbSession):
     """List all accounts for the current user."""
     service = AccountService(db)
@@ -35,7 +35,7 @@ async def get_account(account_id: uuid.UUID, db: DbSession):
     return account
 
 
-@router.post("/")
+@router.post("")
 async def create_account(payload: dict, db: DbSession):
     """Manually create an account (when auto-detection is insufficient)."""
     service = AccountService(db)

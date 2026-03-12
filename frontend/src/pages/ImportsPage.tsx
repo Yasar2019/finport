@@ -19,7 +19,7 @@ export function ImportsPage() {
 
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ['import-sessions'],
-    queryFn: () => getImportSessions().then(r => r.data),
+    queryFn: () => getImportSessions().then(r => r.data.items ?? r.data),
     refetchInterval: 5000,  // poll while processing
   });
 

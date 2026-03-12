@@ -5,7 +5,7 @@ from fastapi import APIRouter
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("")
 async def get_settings_view():
     """
     Return non-sensitive application settings.
