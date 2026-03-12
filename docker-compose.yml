@@ -46,6 +46,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/1
+      LOCAL_STORAGE_ROOT: /app/data/uploads
     volumes:
       - ./backend:/app/backend
       - ./parsers:/app/parsers
@@ -74,8 +75,11 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      DATABASE_URL: postgresql+psycopg2://finport:finport_dev_password@db:5432/finport
+      DATABASE_URL: postgresql+asyncpg://finport:finport_dev_password@db:5432/finport
       REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      LOCAL_STORAGE_ROOT: /app/data/uploads
     volumes:
       - ./backend:/app/backend
       - ./parsers:/app/parsers
@@ -87,14 +91,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: >
-      sh -c "
-        cd /app/backend &&
-        celery -A app.workers.celery_app worker
-          --loglevel=info
-          --queues=ingestion,reconciliation
-          --concurrency=2
-      "
+    command: ["sh", "-c", "cd /app/backend && celery -A app.workers.celery_app worker --loglevel=info --queues=ingestion,reconciliation,celery --concurrency=2"]
 
   # ─── Flower (Celery monitoring) ────────────────────────────────────────────
   flower:

@@ -15,6 +15,10 @@ from sqlalchemy.orm import sessionmaker
 from app.config import get_settings
 from app.workers.celery_app import celery_app
 
+# Register all parsers (generic + institution-specific) at worker startup
+from parsers.registry import ParserRegistry
+ParserRegistry.load_all_parsers()
+
 logger = structlog.get_logger(__name__)
 settings = get_settings()
 
@@ -78,26 +82,9 @@ def run_ingestion_pipeline(self, import_session_id: str) -> dict:
             import asyncio
 
             storage = get_storage_backend()
-            content = asyncio.get_event_loop().run_until_complete(
-                storage.read(session.storage_path)
-            )
+            content = asyncio.run(storage.read(session.storage_path))
 
-            # Detect institution
-            detector = InstitutionDetector()
-            detection = detector.detect(
-                filename=session.original_filename,
-                content=content,
-                file_format=session.file_format,
-            )
-
-            # Select parser
-            parser_cls = ParserRegistry.get_parser(
-                institution_key=detection.institution_key,
-                file_format=session.file_format,
-            )
-            parser = parser_cls()
-
-            # Write file to temp path, parse, clean up
+            # Write file to temp path for detection + parsing
             import tempfile, os
 
             with tempfile.NamedTemporaryFile(
@@ -109,9 +96,28 @@ def run_ingestion_pipeline(self, import_session_id: str) -> dict:
             try:
                 from pathlib import Path
 
+                # Detect institution
+                detector = InstitutionDetector()
+                detection = detector.detect(
+                    filename=session.original_filename,
+                    file_path=Path(tmp_path),
+                    file_format=session.file_format,
+                )
+
+                # Select parser
+                parser_cls = ParserRegistry.get_parser(
+                    institution_key=detection.institution_key,
+                    file_format=session.file_format,
+                )
+                if parser_cls is None:
+                    raise ValueError(
+                        f"No parser available for format={session.file_format} "
+                        f"institution={detection.institution_key}"
+                    )
+                parser = parser_cls()
                 result = parser.parse(Path(tmp_path))
             finally:
-                os.unlink(tmp_path)  # Always delete temp file
+                os.unlink(tmp_path)
 
             # Persist parser run
             from app.models.parser_run import ParserRun
@@ -137,22 +143,26 @@ def run_ingestion_pipeline(self, import_session_id: str) -> dict:
             db.add(parser_run)
             db.flush()
 
-            # Normalise candidates
-            from app.services.normalisation_service import NormalisationService
+            # Normalise candidates — skip if no account is linked yet
+            if session.account_id:
+                from app.services.normalisation_service import NormalisationService
 
-            norm_service = NormalisationService(db)
-            norm_service.normalise(
-                parser_result=result,
-                import_session=session,
-                parser_run=parser_run,
-            )
+                norm_service = NormalisationService()
+                norm_service.normalise(
+                    parser_result=result,
+                    import_session=session,
+                    parser_run=parser_run,
+                    db=db,
+                )
 
-            # Reconcile
-            run_reconciliation.delay(import_session_id=import_session_id)
+                # Reconcile only after successful normalisation
+                run_reconciliation.delay(import_session_id=import_session_id)
 
             # Update session
             session.status = (
-                "completed" if result.overall_confidence >= 0.65 else "needs_review"
+                "needs_review"
+                if not session.account_id
+                else ("completed" if result.overall_confidence >= 0.65 else "needs_review")
             )
             if detection.institution_key:
                 pass  # resolve institution_id from short_code if needed
