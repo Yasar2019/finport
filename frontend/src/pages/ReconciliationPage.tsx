@@ -64,7 +64,7 @@ export function ReconciliationPage() {
                     {String(issue.issue_type).replace(/_/g, ' ')}
                   </span>
                   <p className="mt-2 text-sm text-gray-800">{String(issue.description)}</p>
-                  {issue.suggested_action && (
+                  {issue.suggested_action != null && (
                     <p className="mt-1 text-xs text-gray-500">
                       Suggestion: {String(issue.suggested_action)}
                     </p>

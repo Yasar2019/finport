@@ -6,7 +6,7 @@ Canonical reference for all financial instruments.
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -89,7 +89,3 @@ class SecurityAlias(Base):
     )
 
 
-# Avoid circular import at module level
-from sqlalchemy import (
-    ForeignKey,
-)  # noqa: E402 (already imported above, kept for clarity)
