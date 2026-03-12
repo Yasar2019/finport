@@ -70,7 +70,9 @@ async def performance(
 async def dividend_income(
     db: DbSession,
     year: Annotated[int | None, Query()] = None,
-    group_by: Annotated[str, Query(pattern="^(month|quarter|year|security)$")] = "month",
+    group_by: Annotated[
+        str, Query(pattern="^(month|quarter|year|security)$")
+    ] = "month",
 ):
     """Dividend income history grouped by the specified period or security."""
     service = AnalyticsService(db)

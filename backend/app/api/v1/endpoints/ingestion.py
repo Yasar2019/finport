@@ -93,7 +93,9 @@ async def upload_statement(
     }
 
 
-@router.get("/{session_id}/status", responses={404: {"description": "Import session not found"}})
+@router.get(
+    "/{session_id}/status", responses={404: {"description": "Import session not found"}}
+)
 async def get_import_status(session_id: uuid.UUID, db: DbSession):
     """Poll the processing status of an import session."""
     service = IngestionService(db=db, storage=get_storage_backend())

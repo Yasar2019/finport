@@ -63,6 +63,8 @@ class IngestionService:
         )
         self._db.add(session)
         await self._db.flush()
+        # Commit before enqueueing to ensure worker can find the session
+        await self._db.commit()
 
         # Enqueue background task
         from app.workers.tasks import run_ingestion_pipeline
@@ -103,6 +105,8 @@ class IngestionService:
             raise HTTPException(status_code=404, detail="Import session not found.")
         session.status = "queued"
         await self._db.flush()
+        await self._db.commit()
+        
         from app.workers.tasks import run_ingestion_pipeline
 
         task = run_ingestion_pipeline.delay(import_session_id=str(session.id))  # type: ignore[attr-defined]

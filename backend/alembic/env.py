@@ -28,9 +28,12 @@ def _sync_url(url: str) -> str:
 
 def run_migrations_offline() -> None:
     import os
+
     db_url = os.getenv("DATABASE_URL") or config.get_main_option(_SQLALCHEMY_URL)
     if not db_url:
-        raise ValueError("DATABASE_URL not set and sqlalchemy.url not configured in alembic.ini")
+        raise ValueError(
+            "DATABASE_URL not set and sqlalchemy.url not configured in alembic.ini"
+        )
     url = _sync_url(db_url)
     context.configure(
         url=url,
@@ -48,7 +51,9 @@ def run_migrations_online() -> None:
 
     db_url = os.getenv("DATABASE_URL") or config.get_main_option(_SQLALCHEMY_URL)
     if not db_url:
-        raise ValueError("DATABASE_URL not set and sqlalchemy.url not configured in alembic.ini")
+        raise ValueError(
+            "DATABASE_URL not set and sqlalchemy.url not configured in alembic.ini"
+        )
     sync_url = _sync_url(db_url)
 
     connectable = engine_from_config(

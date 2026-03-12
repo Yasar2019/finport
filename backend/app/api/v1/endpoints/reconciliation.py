@@ -19,7 +19,9 @@ DbSession = Annotated[AsyncSession, Depends(get_db_session)]
 async def list_issues(
     db: DbSession,
     severity: Annotated[str | None, Query(pattern="^(info|warning|error)$")] = None,
-    status: Annotated[str | None, Query(pattern="^(open|resolved|dismissed|all)$")] = "open",
+    status: Annotated[
+        str | None, Query(pattern="^(open|resolved|dismissed|all)$")
+    ] = "open",
     limit: Annotated[int, Query(le=500)] = 100,
     offset: Annotated[int, Query(ge=0)] = 0,
 ):

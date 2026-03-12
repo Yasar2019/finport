@@ -17,6 +17,7 @@ from app.workers.celery_app import celery_app
 
 # Register all parsers (generic + institution-specific) at worker startup
 from parsers.registry import ParserRegistry
+
 ParserRegistry.load_all_parsers()
 
 logger = structlog.get_logger(__name__)
