@@ -106,7 +106,7 @@ class IngestionService:
         session.status = "queued"
         await self._db.flush()
         await self._db.commit()
-        
+
         from app.workers.tasks import run_ingestion_pipeline
 
         task = run_ingestion_pipeline.delay(import_session_id=str(session.id))  # type: ignore[attr-defined]

@@ -4,7 +4,7 @@ import { getHoldings } from '@/lib/api';
 export function HoldingsPage() {
   const { data = [], isLoading } = useQuery({
     queryKey: ['holdings'],
-    queryFn: () => getHoldings().then(r => r.data),
+    queryFn: () => getHoldings().then(r => r.data.items ?? []),
   });
 
   const fmt = (n: number) =>

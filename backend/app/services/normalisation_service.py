@@ -187,13 +187,14 @@ class NormalisationService:
             )
             tx = Transaction(
                 id=uuid.uuid4(),
+                user_id=import_session.user_id,
                 account_id=(account.id if account else None),
                 statement_id=statement.id,
                 import_session_id=import_session.id,
                 transaction_date=candidate.transaction_date,
                 settlement_date=candidate.settlement_date,
                 description_raw=candidate.description_raw,
-                description_normalised=candidate.description_raw,
+                description_normalized=candidate.description_raw,
                 transaction_type=_normalise_tx_type(
                     candidate.transaction_type_hint, candidate.amount
                 ),
@@ -226,6 +227,7 @@ class NormalisationService:
                 continue
             holding = Holding(
                 id=uuid.uuid4(),
+                user_id=import_session.user_id,
                 account_id=(account.id if account else None),
                 security_id=security.id,
                 statement_id=statement.id,
@@ -261,12 +263,13 @@ class NormalisationService:
             )
             tx = Transaction(
                 id=uuid.uuid4(),
+                user_id=import_session.user_id,
                 account_id=(account.id if account else None),
                 statement_id=statement.id,
                 import_session_id=import_session.id,
                 transaction_date=candidate.pay_date,
                 description_raw=f"Dividend: {candidate.symbol_raw}",
-                description_normalised=f"Dividend: {candidate.symbol_raw}",
+                description_normalized=f"Dividend: {candidate.symbol_raw}",
                 transaction_type=candidate.dividend_type_hint or "dividend",
                 amount=candidate.total_amount,
                 currency=candidate.currency,
@@ -289,12 +292,13 @@ class NormalisationService:
         for candidate in parser_result.fees:
             tx = Transaction(
                 id=uuid.uuid4(),
+                user_id=import_session.user_id,
                 account_id=(account.id if account else None),
                 statement_id=statement.id,
                 import_session_id=import_session.id,
                 transaction_date=candidate.fee_date,
                 description_raw=candidate.description_raw,
-                description_normalised=candidate.description_raw,
+                description_normalized=candidate.description_raw,
                 transaction_type="fee",
                 amount=-abs(candidate.amount),  # fees are always negative
                 currency=candidate.currency,

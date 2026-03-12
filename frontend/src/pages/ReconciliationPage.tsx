@@ -13,7 +13,7 @@ export function ReconciliationPage() {
 
   const { data: issues = [], isLoading } = useQuery({
     queryKey: ['reconciliation-issues'],
-    queryFn: () => getReconciliationIssues({ status: 'open' }).then(r => r.data),
+    queryFn: () => getReconciliationIssues({ status: 'open' }).then(r => r.data.items ?? []),
   });
 
   const resolveMut = useMutation({

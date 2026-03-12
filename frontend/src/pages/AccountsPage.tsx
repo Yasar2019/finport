@@ -4,7 +4,7 @@ import { getAccounts } from '@/lib/api';
 export function AccountsPage() {
   const { data: accounts = [], isLoading } = useQuery({
     queryKey: ['accounts'],
-    queryFn: () => getAccounts().then(r => r.data),
+    queryFn: () => getAccounts().then(r => r.data.items ?? []),
   });
 
   const fmt = (n: number) =>

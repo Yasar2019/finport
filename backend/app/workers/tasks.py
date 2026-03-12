@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 
 import structlog
 from celery import Task
+from sqlalchemy import select
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -144,31 +145,76 @@ def run_ingestion_pipeline(self, import_session_id: str) -> dict:
             db.add(parser_run)
             db.flush()
 
-            # Normalise candidates — skip if no account is linked yet
-            if session.account_id:
-                from app.services.normalisation_service import NormalisationService
+            # Resolve or create institution, then ensure the session is linked to an account
+            from app.models.account import Account
+            from app.models.institution import Institution
 
-                norm_service = NormalisationService()
-                norm_service.normalise(
-                    parser_result=result,
-                    import_session=session,
-                    parser_run=parser_run,
-                    db=db,
+            institution_code = (detection.institution_key or "unknown").lower()
+            institution = db.execute(
+                select(Institution).where(Institution.short_code == institution_code)
+            ).scalar_one_or_none()
+            if institution is None:
+                institution = Institution(
+                    short_code=institution_code,
+                    name=(
+                        detection.institution_key.replace("_", " ").title()
+                        if detection.institution_key
+                        else "Unknown Institution"
+                    ),
+                    institution_type="brokerage",
+                    country="US",
+                    default_currency=result.metadata.currency or "USD",
+                    parser_key=detection.institution_key,
                 )
+                db.add(institution)
+                db.flush()
 
-                # Reconcile only after successful normalisation
-                run_reconciliation.delay(import_session_id=import_session_id)  # type: ignore[attr-defined]
+            session.detected_institution_id = institution.id
+
+            if not session.account_id:
+                account_name = f"{institution.name} Imported Account"
+                account = db.execute(
+                    select(Account).where(
+                        Account.user_id == session.user_id,
+                        Account.institution_id == institution.id,
+                        Account.account_name == account_name,
+                        Account.deleted_at.is_(None),
+                    )
+                ).scalar_one_or_none()
+                if account is None:
+                    account = Account(
+                        user_id=session.user_id,
+                        institution_id=institution.id,
+                        account_name=account_name,
+                        account_type="brokerage",
+                        currency=result.metadata.currency or "USD",
+                    )
+                    db.add(account)
+                    db.flush()
+                session.account_id = account.id
+
+            from app.services.normalisation_service import NormalisationService
+
+            norm_service = NormalisationService()
+            norm_service.normalise(
+                parser_result=result,
+                import_session=session,
+                parser_run=parser_run,
+                db=db,
+            )
+
+            # Reconcile only after successful normalisation
+            run_reconciliation.delay(import_session_id=import_session_id)  # type: ignore[attr-defined]
 
             # Update session
-            if not session.account_id or result.overall_confidence < 0.65:
+            if result.overall_confidence < 0.65:
                 session.status = "needs_review"
             else:
                 session.status = "completed"
-            if detection.institution_key:
-                pass  # resolve institution_id from short_code if needed
             session.statement_period_start = result.metadata.period_start
             session.statement_period_end = result.metadata.period_end
             session.statement_date = result.metadata.statement_date
+            session.error_message = None
             session.completed_at = datetime.now(timezone.utc)
             db.commit()
 
